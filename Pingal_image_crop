@@ -1,0 +1,27 @@
+from PIL import Image
+import os
+
+# Step 1: Load the ECG image
+img_path = "ecg_page.png"  # Replace with your actual file path
+img = Image.open(img_path)
+width, height = img.size
+
+# Step 2: Remove the top header region manually
+header_cutoff = 500  # You can fine-tune this based on your image
+usable_height = height - header_cutoff
+lead_height = usable_height // 12  # 12 leads stacked vertically
+
+# Step 3: Define standard 12-lead labels in order
+lead_names = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"]
+
+# Step 4: Crop and save each lead
+output_dir = "clean_leads"
+os.makedirs(output_dir, exist_ok=True)
+
+for i, lead_name in enumerate(lead_names):
+    top = header_cutoff + i * lead_height
+    bottom = top + lead_height
+    cropped = img.crop((0, top, width, bottom))
+    cropped.save(os.path.join(output_dir, f"lead_{lead_name}.png"))
+
+print("✅ All 12 ECG leads cropped and saved in the 'clean_leads/' folder.")
